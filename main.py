@@ -1,5 +1,5 @@
 """
-building a swarm intelligence for
+building a swarm intelligence (based on Swarm Evolve 1.0) for
 20 SECONDS GAME JAM 2022 (https://itch.io/jam/20-second-game-jam)
 Author: Felix Köcher (https://github.com/koecher19)
 """
@@ -24,7 +24,7 @@ class Particle:
         self.turtle.shape("square")
         self.turtle.fillcolor("white")
         self.turtle.penup()
-        self.turtle.shapesize(stretch_wid=0.5, stretch_len=0.5)
+        self.turtle.shapesize(stretch_wid=0.25, stretch_len=0.25)
         self.pos = np.array([0, 0])
         self.vel = np.array([np.random.randint(-10, 10), np.random.randint(-10, 10)])
         self.turtle.goto(self.pos[0], self.pos[1])
@@ -40,6 +40,20 @@ class Particle:
         self.pos += self.vel
         self.turtle.setx(self.pos[0])
         self.turtle.sety(self.pos[1])
+        return
+
+    def update_vel(self):
+        """
+        calculate veclocity as weighted sum of these vectors:
+
+        v_1: points away from neighbors in vicinity
+        v_2: points to world center
+        v_3: mean vector of neighbours
+        v_4: points to center of weight of all agents
+        v_5: random vector
+        v_6: points away from neighbours of different species
+        v_7: points to energy source
+        """
         return
 
 
@@ -74,10 +88,10 @@ def update_timer(frame_number):
 
 if __name__ == '__main__':
 
-    ps = ParticleSys(num_particles=20)
+    ps = ParticleSys(num_particles=50)
 
     # main loop:
-    frames_per_second = 12
+    frames_per_second = 24
     for frame in range(0, frames_per_second * 20):
         w.update()
         time.sleep(1/frames_per_second)
@@ -85,6 +99,5 @@ if __name__ == '__main__':
 
         # update position
         ps.update_pos()
-        print(ps.members[0].vel)
 
     w.bye()
