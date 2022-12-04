@@ -31,11 +31,11 @@ w.tracer(0)
  v_7: points to energy source
  """
 alpha_v_1 = 0.1
-alpha_v_2 = 0.0
-alpha_v_3 = 0.01
-alpha_v_4 = 0.001
+alpha_v_2 = 0.001
+alpha_v_3 = 0.005
+alpha_v_4 = 0.01
 alpha_v_5 = 0.05
-alpha_v_6 = 0.3
+alpha_v_6 = 0.1
 alpha_v_7 = 0.01
 dampening_factor = 0.98
 
@@ -56,7 +56,7 @@ class Particle:
             # set turtle
             self.turtle.shape("circle")
             self.turtle.fillcolor("green")
-            self.size = 20
+            self.size = 30
             self.turtle.shapesize(stretch_len=self.size / 20, stretch_wid=self.size / 20)
 
             self.turtle.speed(0)
@@ -142,9 +142,9 @@ class Particle:
 # PARTICLE SYSTEM
 class ParticleSys:
     def __init__(self, num_particle_a: int, num_particle_b: int, num_foodsource: int):
+        self.foodsources = [Particle(type="foodsource") for i in range(num_foodsource)]
         self.particles = [Particle(type="particle_a") for i in range(num_particle_a)] + \
                          [Particle(type="particle_b") for i in range(num_particle_b)]
-        self.foodsources = [Particle(type="foodsource") for i in range(num_foodsource)]
         self.members = self.particles + self.foodsources
         # (list of members sorted by x and y koordinates in ascending order):
         self.members_sorted_x = sorted(self.members, key=lambda x: x.pos[0], reverse=False)
@@ -178,7 +178,10 @@ class ParticleSys:
 
                         if self.check_if_neighbouring(obj_a, obj_b):
                             self.neighbour_response(obj_a, obj_b, len(subset))
+                            if self.check_if_colliding(obj_a, obj_b):
+                                self.colliding_response(obj_a, obj_b)
         return
+
 
     def neighbour_response(self, particle_a: Particle, particle_b: Particle, num_neighbours: int):
         # get direction
@@ -187,18 +190,32 @@ class ParticleSys:
         dir_norm = np.linalg.norm(direction)
         direction = direction / dir_norm
         if particle_a.type == particle_b.type != "foodsource":
-            particle_a.vel += alpha_v_1 * direction + alpha_v_3/num_neighbours * particle_b.vel       # v_1 + v_3
-            particle_b.vel -= alpha_v_1 * direction + alpha_v_3/num_neighbours * particle_a.vel       # v_1 + v_3
+            particle_a.vel +=  alpha_v_3/num_neighbours * particle_b.vel                    # v_3
+            particle_b.vel +=  alpha_v_3/num_neighbours * particle_a.vel                    # v_3
         elif particle_a.type == "foodsource":
-            particle_b.vel += alpha_v_7 * dir_norm * direction                                        # v_7
-            particle_b.eat()
+            particle_b.vel += alpha_v_7 * direction                              # v_7
         elif particle_b.type == "foodsource":
-            if dir_norm < 0: dir_norm *= -1
-            particle_a.vel -= alpha_v_7 * dir_norm * direction                                        # v_7
-            particle_a.eat()
-        elif particle_a.type != particle_b.type:                                                      # v_6 (away from different species)
+            particle_a.vel -= alpha_v_7 * direction                              # v_7 (towards foodsource)
+        elif particle_a.type != particle_b.type:                                            # v_6 (away from different species)
             particle_a.vel += alpha_v_6 * direction
             particle_b.vel -= alpha_v_6 * direction
+
+        return
+
+
+    def colliding_response(self, particle_a: Particle, particle_b: Particle):
+        # get direction
+        direction = particle_a.pos - particle_b.pos
+        # normalize vector
+        dir_norm = np.linalg.norm(direction)
+        direction = direction / dir_norm
+        if particle_a.type == particle_b.type != "foodsource":
+            particle_a.vel += alpha_v_1 * direction                                         # v_1
+            particle_b.vel -= alpha_v_1 * direction                                         # v_1
+        elif particle_a.type == "foodsource":
+            particle_b.eat()
+        elif particle_b.type == "foodsource":
+            particle_a.eat()
 
         return
 
@@ -223,7 +240,15 @@ class ParticleSys:
 
 
     def check_if_neighbouring(self, a: Particle, b: Particle):
-        distance = (a.size if a.size >= b.size else b.size) / 1.25
+        distance = (a.size if a.size >= b.size else b.size) * 1.5
+        if (((a.pos[0] - distance) <= b.pos[0] <= (a.pos[0] + distance))
+                and ((a.pos[1] - distance) <= b.pos[1] <= (a.pos[1] + distance))):
+            return True
+        else:
+            return False
+
+    def check_if_colliding(self, a: Particle, b: Particle):
+        distance = (a.size if a.size >= b.size else b.size) / 1.75
         if (((a.pos[0] - distance) <= b.pos[0] <= (a.pos[0] + distance))
                 and ((a.pos[1] - distance) <= b.pos[1] <= (a.pos[1] + distance))):
             return True
@@ -244,7 +269,7 @@ class ParticleSys:
          """
         for obj in self.particles:
             #obj.vel = [0, 0]
-            obj.add_vel(-1 * obj.pos, alpha_v_2)                            # v_2
+            obj.add_vel(-1 * obj.pos/ np.linalg.norm(obj.pos), alpha_v_2)                            # v_2
             if obj.type == "particle_a":
                 obj.add_vel(self.weight_center_a - obj.pos, alpha_v_4)      # v_4
             elif obj.type == "particle_b":
@@ -342,7 +367,7 @@ def run_loop(particle_system: ParticleSys, countdown:int, start_time):
 
 if __name__ == '__main__':
 
-    ps = ParticleSys(num_particle_a=20, num_particle_b=10, num_foodsource=2)
+    ps = ParticleSys(num_particle_a=20, num_particle_b=20, num_foodsource=2)
 
     print("WELCOME TO 20 SECOND SWARM INTELLIGENCE!!")
     print("You can control the swarms behavior by changing these parameters:")
