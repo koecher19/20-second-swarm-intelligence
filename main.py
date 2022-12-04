@@ -3,12 +3,16 @@ building a swarm intelligence (based on Swarm Evolve 1.0) for
 20 SECONDS GAME JAM 2022 (https://itch.io/jam/20-second-game-jam)
 Author: Felix Köcher (https://github.com/koecher19)
 """
-
 import numpy as np
 import turtle
-import tkinter as tk
+import tkinter
+from pygame import mixer
+import os
 import time
 import itertools
+from playsound import playsound
+# sound
+mixer.init()
 
 # WINDOW
 w = turtle.Screen()
@@ -67,8 +71,8 @@ class Particle:
             self.vel = np.array([np.random.uniform(-10, 10), np.random.uniform(-10, 10)], dtype=float)
             self.pos = np.array([np.random.uniform(-200, 200), np.random.uniform(-200, 200)], dtype=float)
             # fill up with random amount of energy
-            #self.energy = np.random.uniform(low=5, high=10)
-            self.energy = 5.0
+            self.energy = np.random.uniform(low=2, high=10)
+            #self.energy = 5.0
 
             # set turtle
             self.turtle.shape("square")
@@ -84,8 +88,8 @@ class Particle:
             self.vel = np.array([np.random.uniform(-10, 10), np.random.uniform(-10, 10)], dtype=float)
             self.pos = np.array([np.random.uniform(-200, 200), np.random.uniform(-200, 200)], dtype=float)
             # fill up with random amount of energy
-            # self.energy = np.random.uniform(low=5, high=10)
-            self.energy = 5.0
+            self.energy = np.random.uniform(low=2, high=10)
+            #self.energy = 5.0
 
             # set turtle
             self.turtle.shape("square")
@@ -136,6 +140,8 @@ class Particle:
 
     def eat(self):
         self.energy += 0.1
+        #mixer.music.load("tone.mp3")
+        #mixer.music.play()
         return
 
 
@@ -291,6 +297,8 @@ class ParticleSys:
             if particle.energy <= 0:
                 particle.turtle.hideturtle()
                 self.particles.remove(particle)
+                mixer.music.load("DEATH.mp3")
+                mixer.music.play()
 
 
 def return_subset(list_a, list_b):
@@ -367,7 +375,7 @@ def run_loop(particle_system: ParticleSys, countdown:int, start_time):
 
 if __name__ == '__main__':
 
-    ps = ParticleSys(num_particle_a=20, num_particle_b=20, num_foodsource=2)
+    ps = ParticleSys(num_particle_a=20, num_particle_b=20, num_foodsource=5)
 
     print("WELCOME TO 20 SECOND SWARM INTELLIGENCE!!")
     print("You can control the swarms behavior by changing these parameters:")
