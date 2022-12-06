@@ -5,12 +5,11 @@ Author: Felix Köcher (https://github.com/koecher19)
 """
 import numpy as np
 import turtle
-import tkinter
+import tkinter as tk
 from pygame import mixer
-import os
 import time
 import itertools
-from playsound import playsound
+
 # sound
 mixer.init()
 
@@ -38,7 +37,7 @@ alpha_v_1 = 0.1
 alpha_v_2 = 0.001
 alpha_v_3 = 0.005
 alpha_v_4 = 0.01
-alpha_v_5 = 0.05
+alpha_v_5 = 0.25
 alpha_v_6 = 0.1
 alpha_v_7 = 0.01
 dampening_factor = 0.98
@@ -334,20 +333,52 @@ def update_timer(countdown: int):
     pen.write("timer: {}".format(countdown), align="left", font=("Courier", 14, "normal"))
     return
 
+
 def update_num_living(num_living: int):
     pen2.clear()
     pen2.write("alive: {}".format(num_living), align="left", font=("Courier", 14, "normal"))
 
 
-# GUI https://compucademy.net/python-turtle-graphics-and-tkinter-gui-programming/
-'''
-canvas = w.getcanvas()
-button = tk.Button(canvas.master, text="Press me", command="press")
-canvas.create_window(-200, -200, window=button)
-def press():
+'''def press():
     print("button pressed!")
+    return'''
+
+# GUI https://compucademy.net/python-turtle-graphics-and-tkinter-gui-programming/
+'''def show_alpha_v_1_values():
+    print(alpha_v_1_scale.get())
+    alpha_v_1 = alpha_v_1_scale.get() / 100
     return
-'''
+def show_alpha_v_2_values():
+    print(alpha_v_2_scale.get())
+    alpha_v_2 = alpha_v_2_scale.get() / 100
+    return
+
+
+canvas2 = w.getcanvas()
+
+text = tk.Label(master=canvas2.master, text="parameters for the flys speed and direction:")
+text.pack()
+
+frame_v_1 = tk.LabelFrame(master=canvas2.master, text="don't fly into neighbours", )
+frame_v_1.pack()
+alpha_v1_button = tk.Button(master=frame_v_1, text="click me", command=show_alpha_v_1_values)
+alpha_v_1_scale = tk.Scale(master=frame_v_1, from_=0, to=100, length=300, orient="horizontal")
+alpha_v_1_scale.pack(side="left")
+alpha_v1_button.pack(side="right")
+
+frame_v_2 = tk.LabelFrame(master=canvas2.master, text="fly towards world center")
+frame_v_2.pack()
+alpha_v2_button = tk.Button(master=frame_v_2, text="click me", command=show_alpha_v_2_values)
+alpha_v_2_scale = tk.Scale(master=frame_v_2, from_=0, to=100, length=300, orient="horizontal")
+alpha_v_2_scale.pack(side="left")
+alpha_v2_button.pack(side="right")'''
+
+
+'''screen2 = turtle.Screen()
+screen2.bgcolor("cyan")
+canvas = screen2.getcanvas()
+button = tk.Button(canvas.master, text="Press me", command=press)
+canvas.create_window(-200, -200, window=button)'''
 
 def run_loop(particle_system: ParticleSys, countdown:int, start_time):
     living_start_time = start_time
@@ -384,7 +415,7 @@ if __name__ == '__main__':
     # main loop:
     count_down = 20
     reference_time = time.process_time()
-
+    #tk.mainloop()
     run_loop(particle_system=ps, countdown=count_down, start_time=reference_time)
 
-    w.bye()
+    #w.bye()
